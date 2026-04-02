@@ -1,0 +1,36 @@
+# --- Built executables (project-specific names) ---
+program
+program.stripped
+q1_demo
+server
+client
+baggage
+temperature
+
+# --- Object / linker output ---
+*.o
+*.obj
+*.a
+*.so
+*.dylib
+*.dll
+*.exe
+
+# --- Python extension build ---
+build/
+dist/
+*.egg-info/
+.eggs/
+__pycache__/
+*.py[cod]
+*$py.class
+vibration*.so
+vibration*.pyd
+
+# --- Strace / gdb logs (if created) ---
+strace.log
+core
+core.*
+
+# --- macOS ---
+.DS_Store
