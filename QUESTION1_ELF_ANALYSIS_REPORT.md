@@ -1,6 +1,10 @@
 # Question 1 — Reverse Engineering Your Own ELF Binary  
 ## Structured Analysis Report (template)
 
+For **Google Docs**: paste the Markdown body without expecting images to transfer; instead insert the PNGs from **`report_assets/`** using **`QUESTION1_FIGURES_FOR_GOOGLE_DOCS.txt`** (ordered list + captions).
+
+---
+
 **Student:** [Your name / ID]  
 **Source:** `program.c`  
 **Binary analyzed:** `program` (stripped ELF, built per brief)  
@@ -245,20 +249,56 @@ External functions (**`malloc`**, **`printf`**, **`free`**) are called via **`.p
 
 ## 7. Extra analytical depth (aim for “Excellent”)
 
-- **System V AMD64 ABI:** First integer/pointer args in **`RDI`, `RSI`, `RDX`, `RCX`, `R8`, `R9`**; return value in **`RAX`**.  
+- **System V AMD64 ABI:** First integer/pointer args in **`RDI`, `RSI`, `RDX`, `RCX`, `R8`, `R9`**; return value in **`RAX`**. (On **AArch64** Linux — e.g. Docker on Apple Silicon — use **`x0`–`x7`** for args and **`x0`** for return; **`bl`** replaces **`call`**.)  
 - **Stack alignment:** Before a `call`, **`RSP ≡ 0 (mod 16)`** after `call` (8-byte return address).  
 - **Stripping:** `strip` removes symbol table / debug info — names disappear in `objdump` but **`.text`** code is unchanged.  
 - **Security (optional):** `checksec` or `readelf`: **PIE**, **NX** (stack non-executable), **RELRO**, **Canary** if enabled by default on your distro.
 
 ---
 
-## 8. Screenshots / appendix checklist
+## 8. Screenshots / appendix
+
+### Environment note (these captures)
+
+The following screenshots were taken inside **Docker** (`ubuntu` image) on a **MacBook**, so the disassembly is **64-bit ARM (AArch64)** Linux ELF: instructions use **`bl`** (branch-with-link) instead of x86 **`call`**, registers **`x0`–`x8`** instead of **`RDI`/`RSI`/…**, and **`x29`** as the frame pointer. That still satisfies the report’s goals (identify **`main`**, user functions, **PLT** calls to **`malloc`/`printf`/`free`**, stack/debugger use). If your rubric requires **x86-64** wording explicitly, either add a sentence that your analysis machine is **aarch64** or repeat the same steps on an **amd64** Linux container:  
+`docker run --rm -it --platform linux/amd64 -v "$PWD":/work -w /work ubuntu:22.04 bash`
+
+### Checklist (also capture if not shown below)
 
 - [ ] `readelf -h` (architecture + entry)  
 - [ ] `readelf -S` or `-l` (key sections)  
-- [ ] `objdump -d` snippet: `main` + one user function + one jump  
 - [ ] `strace` excerpt: `write`, `brk`/`mmap`  
-- [ ] `gdb`: `bt`, `x` on heap, global, stack  
+- [ ] `gdb`: `x` on heap, global, stack (optional extra)  
+
+### Figure 1 — Disassembly of `main` (GDB): `malloc`, user functions, `free@plt`
+
+Shows **`malloc@plt`**, null check, **`fill_array`**, **`compute_sum`**, **`print_result`**, and **`free@plt`** in **`main`**.
+
+![Figure 1: GDB disassembly of main — AArch64](report_assets/Screenshot_2026-04-02_at_10.07.44_PM-99e3395f-1f41-4996-b6d6-e473107a27d3.png)
+
+### Figure 2 — Calls to `compute_sum` / `print_result` and stepping to `malloc`
+
+Shows **`bl`** calls to **`compute_sum`** and **`print_result`**, stepping to source line **`malloc`**, and breakpoint on **`main`**.
+
+![Figure 2: Disassembly and step into malloc line](report_assets/Screenshot_2026-04-02_at_10.06.40_PM-48c8d2c8-29ec-4eda-93d1-814fe87a2cab.png)
+
+### Figure 3 — Breakpoint in `main`, `run`, and source at line 30
+
+Program stops in **`main`** at **`int size = 5;`**; illustrates GDB source correlation. (ASLR-disable warning in Docker is common and harmless for this lab.)
+
+![Figure 3: Breakpoint at main, run, line 30](report_assets/Screenshot_2026-04-02_at_10.07.01_PM-eb0dcaba-c5b8-4d81-9d10-791518053e2b.png)
+
+### Figure 4 — Backtrace (`bt`) at `main`
+
+Single frame **`#0  main () at program.c:30`** — stack inspection at entry to **`main`**.
+
+![Figure 4: gdb backtrace at main](report_assets/Screenshot_2026-04-02_at_10.07.17_PM-611ea971-f623-4831-a47c-5589c8529a6b.png)
+
+### Figure 5 — Register state (`info registers`)
+
+Sample **AArch64** register dump (**`x5`–`x29`**, **`x29`** frame pointer).
+
+![Figure 5: info registers (AArch64)](report_assets/Screenshot_2026-04-02_at_10.07.29_PM-28a5ff73-c484-4a05-a27e-226684cf1e03.png)
 
 ---
 

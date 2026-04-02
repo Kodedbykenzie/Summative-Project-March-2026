@@ -1,17 +1,3 @@
-/*
- * Python C extension: vibration statistics on sequences of double readings.
- *
- * Conversion: PyList/PyTuple only; each element must be PyFloat (strict).
- * We use PySequence_GetItem + PyFloat_AS_DOUBLE after validation — no malloc:
- * values are read directly from Python float objects in O(1) per element.
- *
- * Time: all functions are O(n) in the number of samples with a single pass
- * (std_dev uses two passes for numerical stability vs one-pass Welford).
- *
- * Empty input: peak_to_peak/rms return 0.0; std_dev returns 0.0; above_threshold
- * returns 0; summary returns a dict with count 0 and zeros for aggregates.
- */
-
 #include <Python.h>
 #include <math.h>
 
