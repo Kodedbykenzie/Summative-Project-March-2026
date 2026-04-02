@@ -1,11 +1,7 @@
 # Question 1 — Reverse Engineering Your Own ELF Binary  
-## Structured Analysis Report (template)
+## Structured Analysis Report 
 
-For **Google Docs**: paste the Markdown body without expecting images to transfer; instead insert the PNGs from **`report_assets/`** using **`QUESTION1_FIGURES_FOR_GOOGLE_DOCS.txt`** (ordered list + captions).
-
----
-
-**Student:** [Your name / ID]  
+**Student:** [Precious Chibundu Mozia]  
 **Source:** `program.c`  
 **Binary analyzed:** `program` (stripped ELF, built per brief)  
 
